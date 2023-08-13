@@ -1,7 +1,16 @@
 import { AppBar, Button, Grid, IconButton, LinearProgress, Paper, TextField, Toolbar, Typography } from '@mui/material'
+import { ImagePicker } from 'react-file-picker'
 import React, { createRef, useEffect, useRef, useState } from 'react'
+import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import Slider from '@mui/material/Slider';
+
 
 const App=props=>{
 
@@ -12,6 +21,12 @@ const App=props=>{
   const negativePromptRef=useRef()
   const [loading,setLoading]=useState(false)
   const [images,setImages]=useState([])
+
+  const [base64,setBase64]=useState(null)
+
+  const [guidanceValue,setGuidanceValue]=useState(10)
+  const [strengthValue,setStrengthValue]=useState(0.5)
+  const strengthRef=useRef()
 
  
 
@@ -64,6 +79,12 @@ const App=props=>{
 
   const imagesRef=useRef();
 
+  const [type,setType]=useState('txt2img')
+
+  const handleChange=e=>{
+    setType(e.target.value)
+  }
+
 
   const imagesFetched=()=>{
     toast.success("Generated Successfully")
@@ -97,70 +118,143 @@ const App=props=>{
   }
 
   const generateClick=async ()=>{
-    const modelId=modelRef.current.value.trim()
-    const loraId=loraRef.current.value.trim()
-    const nSamples=parseInt(nRef.current.value.trim())
-    const prompt=promptRef.current.value.trim()
-    const negativePrompt=negativePromptRef.current.value.trim()
-
-    if(modelId.length===0)
-      toast.error("Model Id is empty")
-    else if(nSamples===undefined || nSamples===NaN || nSamples===null || nSamples<1)
-      toast.error("Invalid number of samples")
-    else if(loraId.length===0)
-      toast.error("LORA Id is empty")
-    else if(prompt.length===0)
-      toast.error("prompt is empty")
-    else{
-      setLoading(true)
-      try{
-        const reqBody={
-          "key": "5MqpLpSJY3vBIPyWYQKZTzSlG9TF7JeZZeclqQT8jKYt7lHjkKQLr7HwCvox",
-          "model_id": modelId,
-          "lora_model" : loraId,
-          "prompt": prompt,
-          "negative_prompt": negativePrompt,
-          "width": "512",
-          "height": "512",
-          "samples": `${nSamples}`,
-          "num_inference_steps": "30",
-          "seed": null,
-          "guidance_scale": 7.5,
-          "webhook": null,
-          "track_id": null,
-          "enhance_prompt":'no'
-        }
-        const result=await axios.post('https://stablediffusionapi.com/api/v4/dreambooth',reqBody)
-        
-        if(result.data.status==='processing'){
-          toast("Processing...")
-          tryFetchTillSucceed(result.data.id)
-
-        } else if(result.data.status==="success"){
-          toast.success("Generated Successfully")
-          setImages(result.data.output)
+    if(type==='txt2img'){
+      const modelId=modelRef.current.value.trim()
+      const loraId=loraRef.current.value.trim()
+      const nSamples=parseInt(nRef.current.value.trim())
+      const prompt=promptRef.current.value.trim()
+      const negativePrompt=negativePromptRef.current.value.trim()
+  
+      if(modelId.length===0)
+        toast.error("Model Id is empty")
+      else if(nSamples===undefined || nSamples===NaN || nSamples===null || nSamples<1)
+        toast.error("Invalid number of samples")
+      else if(loraId.length===0)
+        toast.error("LORA Id is empty")
+      else if(prompt.length===0)
+        toast.error("prompt is empty")
+      else{
+        setLoading(true)
+        try{
+          const reqBody={
+            "key": "5MqpLpSJY3vBIPyWYQKZTzSlG9TF7JeZZeclqQT8jKYt7lHjkKQLr7HwCvox",
+            "model_id": modelId,
+            "lora_model" : loraId,
+            "prompt": prompt,
+            "negative_prompt": negativePrompt,
+            "width": "512",
+            "height": "512",
+            "samples": `${nSamples}`,
+            "num_inference_steps": "30",
+            "seed": null,
+            "guidance_scale": 7.5,
+            "webhook": null,
+            "track_id": null,
+            "enhance_prompt":'no'
+          }
+          const result=await axios.post('https://stablediffusionapi.com/api/v4/dreambooth',reqBody)
+          
+          if(result.data.status==='processing'){
+            toast("Processing...")
+            tryFetchTillSucceed(result.data.id)
+  
+          } else if(result.data.status==="success"){
+            toast.success("Generated Successfully")
+            setImages(result.data.output)
+            setLoading(false)
+          }  else{
+            toast.error("An error occurred")
+            setLoading(false)
+  
+          }
+          
+          
+        }catch(e){
+          console.log(e)
+          toast.error("API error occurred")
           setLoading(false)
-        }  else{
-          toast.error("An error occurred")
-          setLoading(false)
-
         }
-        
-        
-      }catch(e){
-        console.log(e)
-        toast.error("API error occurred")
-        setLoading(false)
+      }
+    }else{
+
+
+      const nSamples=parseInt(nRef.current.value.trim())
+      const prompt=promptRef.current.value.trim()
+      const negativePrompt=negativePromptRef.current.value.trim()
+
+      if(nSamples===undefined || nSamples===NaN || nSamples===null || nSamples<1)
+        toast.error("Invalid number of samples")
+      else if(prompt.length===0)
+        toast.error("prompt is empty")
+      else if(base64===null)
+        toast.error('Please select an prompt image')
+      else{
+
+        try{
+          setLoading(true)
+          const imageUploadResult=await axios.post('https://ddvai.com/api/upload',{
+            image:base64
+          })
+          toast('Image uploaded...')
+          try{
+            const reqBody={
+              "key": "5MqpLpSJY3vBIPyWYQKZTzSlG9TF7JeZZeclqQT8jKYt7lHjkKQLr7HwCvox",
+              "prompt": prompt,
+              "model_id": "anything-v5",
+              "negative_prompt": negativePrompt,
+              "init_image": imageUploadResult.data.link,
+              "width": "512",
+              "height": "512",
+              "samples": `${nSamples}`,
+              "num_inference_steps": "30",
+              "safety_checker": "yes",
+              "enhance_prompt": "yes",
+              "guidance_scale": guidanceValue,
+              "strength": strengthValue,
+              "scheduler": "UniPCMultistepScheduler",
+              "seed": null,
+              "lora_model": null,
+              "tomesd": "yes",
+              "use_karras_sigmas": "yes",
+              "vae": null,
+              "lora_strength": null,
+              "embeddings_model": null,
+              "webhook": null,
+              "track_id": null
+            }
+            console.log(reqBody)
+            const result=await axios.post('https://stablediffusionapi.com/api/v4/dreambooth/img2img',reqBody)
+            
+            if(result.data.status==='processing'){
+              toast("Processing...")
+              tryFetchTillSucceed(result.data.id)
+    
+            } else if(result.data.status==="success"){
+              toast.success("Generated Successfully")
+              setImages(result.data.output)
+              setLoading(false)
+            }  else{
+              toast.error("An error occurred")
+              setLoading(false)
+    
+            }
+            
+            
+          }catch(e){
+            console.log(e)
+            toast.error("API error occurred")
+            setLoading(false)
+          }
+        }catch(err){
+          toast.error("image upload failed")
+          setLoading(false)
+        }
       }
     }
 
 
+
   }
-
-
-
-
-  //toast.error("This didn't work.")
 
   return(
     <div>
@@ -175,15 +269,32 @@ const App=props=>{
       <Grid item xs={12} md={6}>
         <Paper style={{padding:'10px'}}>
           <Grid container spacing={1}>
-            <Grid item xs={6} md={4}>
-              <TextField
-              fullWidth 
-              defaultValue={'sd-1.5'}
-                inputRef={modelRef}
-                variant='outlined'
-                label='Model Id'
-                />
-            </Grid>
+            <Grid item xs={12}>
+              <FormControl>
+                <FormLabel id="demo-row-radio-buttons-group-label">Generation Type</FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby="demo-row-radio-buttons-group-label"
+                  name="row-radio-buttons-group"
+                  value={type}
+                  onChange={handleChange}
+                >
+                  <FormControlLabel value="txt2img" control={<Radio />} label="Text to Image" />
+                  <FormControlLabel value="img2img" control={<Radio />} label="Image to Image" />
+                </RadioGroup>
+              </FormControl>
+           </Grid>
+            {
+              type==='txt2img' && <Grid item xs={6} md={4}>
+                <TextField
+                  fullWidth 
+                  defaultValue={'sd-1.5'}
+                    inputRef={modelRef}
+                    variant='outlined'
+                    label='Model Id'
+                    />
+                </Grid>
+            }
             <Grid item xs={6} md={4}>
               <TextField
                 fullWidth 
@@ -194,15 +305,86 @@ const App=props=>{
                   type='number'
                 />
             </Grid>
-            <Grid item xs={12} md={4}>
+            {
+              type==='txt2img' && <Grid item xs={12} md={4}>
               <TextField 
-              inputRef={loraRef}
-              fullWidth
-              defaultValue={'abstract-disco-diffu'}
-                variant='outlined'
-                label='LORA Model'
+                inputRef={loraRef}
+                fullWidth
+                defaultValue={'abstract-disco-diffu'}
+                  variant='outlined'
+                  label='LORA Model'
+                  />
+              </Grid>
+            }
+             {
+              type==='img2img' && <Grid item xs={6} md={4}>
+                <Typography id="input-slider" gutterBottom>
+                  Strength
+                </Typography>
+                
+                <Slider
+                  value={strengthValue}
+                  onChange={e=>{
+                    setStrengthValue(e.target.value)
+                  }}  
+                  valueLabelDisplay="auto"
+                  step={0.1}
+                  marks
+                  min={0}
+                  max={1}
                 />
-            </Grid>
+                
+                </Grid>
+            }
+            {
+              type==='img2img' && <Grid item xs={12} md={4}>
+                <Typography id="input-slider" gutterBottom>
+                  Guidance Scale
+                </Typography>
+                
+                <Slider
+                  value={guidanceValue}
+                  onChange={e=>{
+                    setGuidanceValue(e.target.value)
+                  }}  
+                  valueLabelDisplay="auto"
+                  step={1}
+                  marks
+                  min={1}
+                  max={20}
+                />
+                
+                </Grid>
+            }
+            {
+              type==='img2img' && <Grid item xs={12} md={3}>
+                       {
+                          base64!==null &&   <img style={{width:'100%'}}
+                        src={base64}/>
+                       }
+                      
+                       
+                        <ImagePicker
+                        extensions={['jpg', 'jpeg', 'png']}
+                        dims={{minWidth: 100, minHeight: 100}}
+                        onChange={base64 =>{
+                            setBase64(base64)
+                        }}
+                        onError={errMsg => {
+                            toast.error(errMsg)
+                        }}
+                 >
+                <Button
+                    style={{marginTop:'10px'}}
+                    variant={'outlined'}
+                    startIcon={<DriveFolderUploadIcon/>}
+                >
+                    Update Image
+                </Button>
+            </ImagePicker>
+                
+                </Grid>
+            }
             <Grid item xs={12}>
               <TextField 
               fullWidth
