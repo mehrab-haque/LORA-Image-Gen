@@ -1,5 +1,6 @@
 import { AppBar, Button, Grid, IconButton, LinearProgress, Paper, TextField, Toolbar, Typography } from '@mui/material'
 import { ImagePicker } from 'react-file-picker'
+import Autocomplete from '@mui/material/Autocomplete';
 import React, { createRef, useEffect, useRef, useState } from 'react'
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import toast, { Toaster } from 'react-hot-toast';
@@ -18,6 +19,10 @@ const App=props=>{
   const nRef=useRef()
   const loraRef=useRef()
   const promptRef=useRef()
+
+  const loraStrengthRef=useRef()
+  const seedRef=useRef()
+
   const negativePromptRef=useRef()
   const [loading,setLoading]=useState(false)
   const [images,setImages]=useState([])
@@ -26,6 +31,11 @@ const App=props=>{
 
   const [guidanceValue,setGuidanceValue]=useState(10)
   const [strengthValue,setStrengthValue]=useState(0.5)
+  const [stepsValue,setStepsValue]=useState(30)
+
+  const [models,setModels]=useState(null)
+
+
   const strengthRef=useRef()
 
  
@@ -117,6 +127,23 @@ const App=props=>{
     }, 5000);
   }
 
+  const loadModels=async ()=>{
+    try{
+      toast('Loading models...')
+      var res=await axios.post('https://stablediffusionapi.com/api/v4/dreambooth/model_list',{
+        "key": "5MqpLpSJY3vBIPyWYQKZTzSlG9TF7JeZZeclqQT8jKYt7lHjkKQLr7HwCvox"
+      })
+      setModels(res.data.map(m=>m.model_id))
+      toast.success('Models loaded')
+    }catch(err){
+      toast.error('Error loading models')
+    }
+  }
+
+  useEffect(()=>{
+    loadModels()
+  },[])
+
   const generateClick=async ()=>{
     if(type==='txt2img'){
       const modelId=modelRef.current.value.trim()
@@ -124,6 +151,14 @@ const App=props=>{
       const nSamples=parseInt(nRef.current.value.trim())
       const prompt=promptRef.current.value.trim()
       const negativePrompt=negativePromptRef.current.value.trim()
+      var loraStrength=loraStrengthRef.current.value.trim()
+      var seedValue=seedRef.current.value.trim()
+      if(loraStrength.length===0)loraStrength=null
+      var seed=null
+      try{
+        var tmp=parseInt(seedValue)
+        seed=tmp
+      }catch(err){}
   
       if(modelId.length===0)
         toast.error("Model Id is empty")
@@ -145,9 +180,10 @@ const App=props=>{
             "width": "512",
             "height": "512",
             "samples": `${nSamples}`,
-            "num_inference_steps": "30",
-            "seed": null,
-            "guidance_scale": 7.5,
+            "num_inference_steps": `${stepsValue}`,
+            "seed": seed,
+            "lora_strength":loraStrength,
+            "guidance_scale": guidanceValue,
             "webhook": null,
             "track_id": null,
             "enhance_prompt":'no'
@@ -177,12 +213,24 @@ const App=props=>{
       }
     }else{
 
-
+      const modelId=modelRef.current.value.trim()
       const nSamples=parseInt(nRef.current.value.trim())
       const prompt=promptRef.current.value.trim()
+      var loraId=loraRef.current.value.trim()
+      if(loraId.length===0)loraId=null
       const negativePrompt=negativePromptRef.current.value.trim()
+      var loraStrength=loraStrengthRef.current.value.trim()
+      var seedValue=seedRef.current.value.trim()
+      if(loraStrength.length===0)loraStrength=null
+      var seed=null
+      try{
+        var tmp=parseInt(seedValue)
+        seed=tmp
+      }catch(err){}
 
-      if(nSamples===undefined || nSamples===NaN || nSamples===null || nSamples<1)
+      if(modelId.length===0)
+        toast.error("Model Id is empty")
+      else if(nSamples===undefined || nSamples===NaN || nSamples===null || nSamples<1)
         toast.error("Invalid number of samples")
       else if(prompt.length===0)
         toast.error("prompt is empty")
@@ -200,24 +248,24 @@ const App=props=>{
             const reqBody={
               "key": "5MqpLpSJY3vBIPyWYQKZTzSlG9TF7JeZZeclqQT8jKYt7lHjkKQLr7HwCvox",
               "prompt": prompt,
-              "model_id": "anything-v5",
+              "model_id": modelId,
               "negative_prompt": negativePrompt,
               "init_image": imageUploadResult.data.link,
               "width": "512",
               "height": "512",
               "samples": `${nSamples}`,
-              "num_inference_steps": "30",
+              "num_inference_steps": `${stepsValue}`,
               "safety_checker": "yes",
               "enhance_prompt": "yes",
               "guidance_scale": guidanceValue,
               "strength": strengthValue,
               "scheduler": "UniPCMultistepScheduler",
-              "seed": null,
-              "lora_model": null,
+              "seed": seed,
+              "lora_model": loraId,
               "tomesd": "yes",
               "use_karras_sigmas": "yes",
               "vae": null,
-              "lora_strength": null,
+              "lora_strength": loraStrength,
               "embeddings_model": null,
               "webhook": null,
               "track_id": null
@@ -286,14 +334,37 @@ const App=props=>{
            </Grid>
             {
               type==='txt2img' && <Grid item xs={6} md={4}>
-                <TextField
-                  fullWidth 
-                  defaultValue={'sd-1.5'}
-                    inputRef={modelRef}
-                    variant='outlined'
-                    label='Model Id'
+                {
+                  models!==null?(
+                    <Autocomplete
+                      disablePortal
+                      id="combo-box-demo"
+                      options={models}
+                      defaultValue={{label:'sd-1.5'}}
+                      fullWidth
+                      renderInput={(params) => <TextField inputRef={modelRef} {...params} label="Model Id" />}
                     />
-                </Grid>
+                  ):
+                  <LinearProgress/>
+                }
+              </Grid>
+            }
+            {
+              type==='img2img' && <Grid item xs={6} md={4}>
+                {
+                  models!==null?(
+                    <Autocomplete
+                      disablePortal
+                      id="combo-box-demo"
+                      options={models}
+                      defaultValue={{label:'anything-v5'}}
+                      fullWidth
+                      renderInput={(params) => <TextField {...params} inputRef={modelRef} label="Model Id" />}
+                    />
+                  ):
+                  <LinearProgress/>
+                }
+              </Grid>
             }
             <Grid item xs={6} md={4}>
               <TextField
@@ -305,8 +376,7 @@ const App=props=>{
                   type='number'
                 />
             </Grid>
-            {
-              type==='txt2img' && <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={4}>
               <TextField 
                 inputRef={loraRef}
                 fullWidth
@@ -315,7 +385,6 @@ const App=props=>{
                   label='LORA Model'
                   />
               </Grid>
-            }
              {
               type==='img2img' && <Grid item xs={6} md={4}>
                 <Typography id="input-slider" gutterBottom>
@@ -336,8 +405,7 @@ const App=props=>{
                 
                 </Grid>
             }
-            {
-              type==='img2img' && <Grid item xs={12} md={4}>
+            <Grid item xs={6} md={4}>
                 <Typography id="input-slider" gutterBottom>
                   Guidance Scale
                 </Typography>
@@ -355,7 +423,24 @@ const App=props=>{
                 />
                 
                 </Grid>
-            }
+                <Grid item xs={6} md={4}>
+                <Typography id="input-slider" gutterBottom>
+                  Inference Steps
+                </Typography>
+                
+                <Slider
+                  value={stepsValue}
+                  onChange={e=>{
+                    setStepsValue(e.target.value)
+                  }}  
+                  valueLabelDisplay="auto"
+                  step={1}
+                  marks
+                  min={1}
+                  max={50}
+                />
+                
+                </Grid>
             {
               type==='img2img' && <Grid item xs={12} md={3}>
                        {
@@ -405,6 +490,23 @@ const App=props=>{
                 defaultValue={'painting, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, deformed, ugly, blurry, bad anatomy, bad proportions, extra limbs, cloned face, skinny, glitchy, double torso, extra arms, extra hands, mangled fingers, missing lips, ugly face, distorted face, extra legs, anime'}
                 variant='outlined'
                 label='Negative Prompt (Optional)'
+                />
+            </Grid>
+            <Grid item xs={6} md={4}>
+              <TextField 
+                fullWidth
+                inputRef={loraStrengthRef}
+                variant='outlined'
+                label='LoRa Strength'
+                />
+            </Grid>
+            <Grid item xs={6} md={4}>
+              <TextField 
+                fullWidth
+                inputRef={seedRef}
+                variant='outlined'
+                type='number'
+                label='Seed'
                 />
             </Grid>
             <Grid item xs={12}>
