@@ -516,7 +516,7 @@ const App=props=>{
                 <Button
                 variant='contained'
                 color='primary'
-                disabled={loading}
+                disabled={loading || models===null}
                 onClick={generateClick}
                   style={{float:'right'}}>
                     Generate
