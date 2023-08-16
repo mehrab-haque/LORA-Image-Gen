@@ -442,7 +442,7 @@ const App=props=>{
                 
                 </Grid>
             {
-              type==='img2img' && <Grid item xs={12} md={3}>
+              type==='img2img' && <Grid item xs={12} md={4}>
                        {
                           base64!==null &&   <img style={{width:'100%'}}
                         src={base64}/>
@@ -460,6 +460,7 @@ const App=props=>{
                         }}
                  >
                 <Button
+                fullWidth
                     style={{marginTop:'10px'}}
                     variant={'outlined'}
                     startIcon={<DriveFolderUploadIcon/>}
@@ -470,6 +471,23 @@ const App=props=>{
                 
                 </Grid>
             }
+            <Grid item xs={6} md={4}>
+              <TextField 
+                fullWidth
+                inputRef={loraStrengthRef}
+                variant='outlined'
+                label='LoRa Strength'
+                />
+            </Grid>
+            <Grid item xs={6} md={4}>
+              <TextField 
+                fullWidth
+                inputRef={seedRef}
+                variant='outlined'
+                type='number'
+                label='Seed'
+                />
+            </Grid>
             <Grid item xs={12}>
               <TextField 
               fullWidth
@@ -490,23 +508,6 @@ const App=props=>{
                 defaultValue={'painting, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, deformed, ugly, blurry, bad anatomy, bad proportions, extra limbs, cloned face, skinny, glitchy, double torso, extra arms, extra hands, mangled fingers, missing lips, ugly face, distorted face, extra legs, anime'}
                 variant='outlined'
                 label='Negative Prompt (Optional)'
-                />
-            </Grid>
-            <Grid item xs={6} md={4}>
-              <TextField 
-                fullWidth
-                inputRef={loraStrengthRef}
-                variant='outlined'
-                label='LoRa Strength'
-                />
-            </Grid>
-            <Grid item xs={6} md={4}>
-              <TextField 
-                fullWidth
-                inputRef={seedRef}
-                variant='outlined'
-                type='number'
-                label='Seed'
                 />
             </Grid>
             <Grid item xs={12}>
