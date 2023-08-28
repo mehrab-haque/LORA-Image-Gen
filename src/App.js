@@ -1,4 +1,5 @@
 import { AppBar, Button, Grid, IconButton, LinearProgress, Paper, TextField, Toolbar, Typography } from '@mui/material'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { ImagePicker } from 'react-file-picker'
 import Autocomplete from '@mui/material/Autocomplete';
 import React, { createRef, useEffect, useRef, useState } from 'react'
@@ -43,7 +44,7 @@ const App = props => {
   const imagesRef = useRef();
 
   const [type, setType] = useState('txt23d')
-  const [type3d, setType3d] = useState('gif')
+  const [type3d, setType3d] = useState('ply')
 
   const handleChange = e => {
     setType(e.target.value)
@@ -594,9 +595,15 @@ const App = props => {
                         }} />}
                       {
                         im.split('.')[im.split('.').length-1]==='ply'&&
-                        <div>
-                          PLY
-                        </div>
+                        <a href={im} target='_blank' style={{textDecoration:'none'}}>
+                          <Button
+                            color='primary'
+                            variant='contained'
+                            startIcon={<OpenInNewIcon/>}
+                            >
+                              PLY File
+                          </Button>
+                        </a>
                       }
                     </Paper>
                   </Grid>
