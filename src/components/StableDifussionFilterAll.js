@@ -68,11 +68,12 @@ const StableDiffusionFilterAll = props => {
 
   const [base64, setBase64] = useState(null)
   const [maskBase64, setMaskBase64] = useState(null)
+  const [controlBase64, setControlBase64] = useState(null)
 
-  const [guidanceValue, setGuidanceValue] = useState(10)
+  const [guidanceValue, setGuidanceValue] = useState(3)
   const [conditioningScale, setConditioningScale]= useState(1.9)
   const [strengthValue, setStrengthValue] = useState(0.5)
-  const [stepsValue, setStepsValue] = useState(30)
+  const [stepsValue, setStepsValue] = useState(20)
 
   const [results,setResults]=useState(null)
 
@@ -207,6 +208,8 @@ const StableDiffusionFilterAll = props => {
         toast.error("prompt is empty")
       else if (base64 === null)
         toast.error('Please select the init image')
+      else if (controlBase64 === null)
+        toast.error('Please select the control image')
       else {
 
         try {
@@ -270,7 +273,7 @@ const StableDiffusionFilterAll = props => {
             "strength": strengthValue,
             "lora_model": loraId,
             "clip_skip": "1",
-            "control_image":"https://ddvai.com/api/images/d2ae6a39-e89d-4ba1-a6ab-3f411f9317471694431222367.png",
+            "control_image":controlBase64,
             "tomesd": "yes",
             "vae": null,
             "lora_strength": loraStrength,
@@ -314,7 +317,7 @@ const StableDiffusionFilterAll = props => {
       <AppBar position="static">
         <Toolbar variant="dense">
           <Typography variant="h6" color="inherit" component="div">
-            FPG LORA Gen
+            QR ContrlNet
           </Typography>
         </Toolbar>
       </AppBar>
@@ -380,7 +383,7 @@ const StableDiffusionFilterAll = props => {
                         disablePortal
                         id="combo-box-demo"
                         options={models}
-                        defaultValue={{ label: 'anything-v5' }}
+                        defaultValue={{ label: 'realistic-vision-512' }}
                         fullWidth
                         renderInput={(params) => <TextField {...params} inputRef={modelRef} label="Model Id" />}
                       />
@@ -406,7 +409,7 @@ const StableDiffusionFilterAll = props => {
                   <TextField
                     inputRef={loraRef}
                     fullWidth
-                    defaultValue={'abstract-disco-diffu'}
+                    defaultValue={''}
                     variant='outlined'
                     label='LORA Model'
                   />
@@ -564,16 +567,47 @@ const StableDiffusionFilterAll = props => {
                   fullWidth
                   inputRef={seedRef}
                   variant='outlined'
+                  defaultValue={'3606852171'}
                   type='number'
                   label='Seed'
                 />
               </Grid>
+              {
+                type === 'img2img' && <Grid item xs={12} md={3}>
+                  {
+                    base64 !== null && <img style={{ width: '100%' }}
+                      src={controlBase64} />
+                  }
+
+
+                  <ImagePicker
+                    extensions={['jpg', 'jpeg', 'png']}
+                    dims={{ minWidth: 100, minHeight: 100 }}
+                    onChange={base64 => {
+                      setControlBase64(base64)
+                    }}
+                    onError={errMsg => {
+                      toast.error(errMsg)
+                    }}
+                  >
+                    <Button
+                      fullWidth
+                      style={{ marginTop: '10px' }}
+                      variant={'outlined'}
+                      startIcon={<DriveFolderUploadIcon />}
+                    >
+                      Control Image
+                    </Button>
+                  </ImagePicker>
+
+                </Grid>
+              }
               <Grid item xs={12}>
                 <TextField
                   fullWidth
                   inputRef={promptRef}
                   multiline
-                  defaultValue={'ultra realistic close up portrait ((beautiful pale cyberpunk female with heavy black eyeliner)), blue eyes, shaved side haircut, hyper detail, cinematic lighting, magic neon, dark red city, Canon EOS R3, nikon, f/1.4, ISO 200, 1/160s, 8K, RAW, unedited, symmetrical balance, in-frame, 8K'}
+                  defaultValue={''}
                   rows={8}
                   variant='outlined'
                   label='Prompt'
@@ -585,7 +619,7 @@ const StableDiffusionFilterAll = props => {
                   inputRef={negativePromptRef}
                   multiline
                   rows={5}
-                  defaultValue={'painting, extra fingers, mutated hands, poorly drawn hands, poorly drawn face, deformed, ugly, blurry, bad anatomy, bad proportions, extra limbs, cloned face, skinny, glitchy, double torso, extra arms, extra hands, mangled fingers, missing lips, ugly face, distorted face, extra legs, anime'}
+                  defaultValue={'ugly, disfigured, low quality, blurry, nsfw'}
                   variant='outlined'
                   label='Negative Prompt (Optional)'
                 />
