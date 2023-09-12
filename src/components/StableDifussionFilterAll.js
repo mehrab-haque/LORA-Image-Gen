@@ -208,28 +208,30 @@ const StableDiffusionFilterAll = props => {
         toast.error("prompt is empty")
       else if (base64 === null)
         toast.error('Please select the init image')
-      else if (controlBase64 === null)
+      else if (maskBase64 === null)
         toast.error('Please select the control image')
       else {
 
         try {
-          toast('Uploading image...')
+          toast('Uploading images...')
           setLoading(true)
-          const imageUploadResult = await axios.post('https://ddvai.com/api/upload', {
+          const imageUploadResult = await Promise.all([axios.post('https://ddvai.com/api/upload', {
             image: base64
-          })
+          }),axios.post('https://ddvai.com/api/upload', {
+            image: maskBase64
+          })])
           toast('Image uploaded...')
           console.log(imageUploadResult)
           setLoading(false)
 
-          var maskImageResult=null
-          if(maskBase64!==null){
-            var res = await axios.post('https://ddvai.com/api/upload', {
-              image: maskBase64
-            })
-            maskImageResult=res.data.link
-            toast('Mask image uploaded...')
-          }
+          // var maskImageResult=null
+          // if(maskBase64!==null){
+          //   var res = await axios.post('https://ddvai.com/api/upload', {
+          //     image: maskBase64
+          //   })
+          //   maskImageResult=res.data.link
+          //   toast('Mask image uploaded...')
+          // }
 
           /*
             "auto_hint": "yes",
@@ -260,8 +262,8 @@ const StableDiffusionFilterAll = props => {
             "guess_mode" : "no",
             "prompt": prompt,
             "negative_prompt": negativePrompt,
-            "init_image": imageUploadResult.data.link,
-            "mask_image": maskImageResult,
+            "init_image": imageUploadResult[0].data.link,
+            "mask_image": null,
             "width": "512",
             "height": "512",
             "samples": `${nSamples}`,
@@ -273,7 +275,7 @@ const StableDiffusionFilterAll = props => {
             "strength": strengthValue,
             "lora_model": loraId,
             "clip_skip": "1",
-            "control_image":controlBase64,
+            "control_image":imageUploadResult[1].data.link,
             "tomesd": "yes",
             "vae": null,
             "lora_strength": loraStrength,
@@ -533,7 +535,7 @@ const StableDiffusionFilterAll = props => {
                     extensions={['jpg', 'jpeg', 'png']}
                     dims={{ minWidth: 100, minHeight: 100 }}
                     onChange={maskBase64 => {
-                      setBase64(maskBase64)
+                      setMaskBase64(maskBase64)
                     }}
                     onError={errMsg => {
                       toast.error(errMsg)
@@ -545,7 +547,7 @@ const StableDiffusionFilterAll = props => {
                       variant={'outlined'}
                       startIcon={<DriveFolderUploadIcon />}
                     >
-                      Update Mask
+                      Control Image
                     </Button>
                   </ImagePicker>
 
@@ -572,36 +574,7 @@ const StableDiffusionFilterAll = props => {
                   label='Seed'
                 />
               </Grid>
-              {
-                type === 'img2img' && <Grid item xs={12} md={3}>
-                  {
-                    base64 !== null && <img style={{ width: '100%' }}
-                      src={controlBase64} />
-                  }
-
-
-                  <ImagePicker
-                    extensions={['jpg', 'jpeg', 'png']}
-                    dims={{ minWidth: 100, minHeight: 100 }}
-                    onChange={base64 => {
-                      setControlBase64(base64)
-                    }}
-                    onError={errMsg => {
-                      toast.error(errMsg)
-                    }}
-                  >
-                    <Button
-                      fullWidth
-                      style={{ marginTop: '10px' }}
-                      variant={'outlined'}
-                      startIcon={<DriveFolderUploadIcon />}
-                    >
-                      Control Image
-                    </Button>
-                  </ImagePicker>
-
-                </Grid>
-              }
+           
               <Grid item xs={12}>
                 <TextField
                   fullWidth
