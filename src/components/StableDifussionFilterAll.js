@@ -231,6 +231,7 @@ const StableDiffusionFilterAll = props => {
           console.log(imageUploadResult)
           setLoading(false)
 
+
           // var maskImageResult=null
           // if(maskBase64!==null){
           //   var res = await axios.post('https://ddvai.com/api/upload', {
@@ -542,7 +543,7 @@ const StableDiffusionFilterAll = props => {
               </Grid>
               <Grid item xs={12} md ={6}>
                 <center>
-                  <div id='capture'>
+                  <div id='capture' style={{paddingTop:'12px',paddingLeft:'10px',paddingRight:'10px',paddingBottom:'10px'}}>
                     <QRCode value={qrText}/>
                   </div>
                 </center>
