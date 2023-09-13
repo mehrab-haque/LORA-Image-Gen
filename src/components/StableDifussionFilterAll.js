@@ -1,5 +1,6 @@
 import { AppBar, Button, Grid, IconButton, LinearProgress, Paper, TextField, Toolbar, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import QRCode from "react-qr-code";
 import { ImagePicker } from 'react-file-picker'
 import Autocomplete from '@mui/material/Autocomplete';
 import React, { createRef, useEffect, useRef, useState } from 'react'
@@ -12,6 +13,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 import Slider from '@mui/material/Slider';
+import html2canvas from 'html2canvas';
 
 const controlNetModels=[
   // "canny",
@@ -78,6 +80,8 @@ const StableDiffusionFilterAll = props => {
   const [results,setResults]=useState(null)
 
   const [models, setModels] = useState(null)
+
+  const [qrText,setQrText]=useState('')
 
   const outputsRef=useRef()
 
@@ -182,6 +186,8 @@ const StableDiffusionFilterAll = props => {
   }
 
   const generateClick = async () => {
+
+
     const modelId = modelRef.current.value.trim()
       const nSamples = parseInt(nRef.current.value.trim())
       const prompt = promptRef.current.value.trim()
@@ -208,17 +214,18 @@ const StableDiffusionFilterAll = props => {
         toast.error("prompt is empty")
       else if (base64 === null)
         toast.error('Please select the init image')
-      else if (maskBase64 === null)
-        toast.error('Please select the control image')
+      else if (qrText.trim().length === 0)
+        toast.error('Please enter QR text')
       else {
 
         try {
           toast('Uploading images...')
           setLoading(true)
+          var canvas=await html2canvas(document.querySelector("#capture"))
           const imageUploadResult = await Promise.all([axios.post('https://ddvai.com/api/upload', {
             image: base64
           }),axios.post('https://ddvai.com/api/upload', {
-            image: maskBase64
+            image: canvas.toDataURL("image/jpeg")
           })])
           toast('Image uploaded...')
           console.log(imageUploadResult)
@@ -517,42 +524,29 @@ const StableDiffusionFilterAll = props => {
                       variant={'outlined'}
                       startIcon={<DriveFolderUploadIcon />}
                     >
-                      Update Image
+                      init Image
                     </Button>
                   </ImagePicker>
 
                 </Grid>
               }
-              {
-                type === 'img2img' && <Grid item xs={12} md={3}>
-                  {
-                    maskBase64 !== null && <img style={{ width: '100%' }}
-                      src={maskBase64} />
-                  }
-
-
-                  <ImagePicker
-                    extensions={['jpg', 'jpeg', 'png']}
-                    dims={{ minWidth: 100, minHeight: 100 }}
-                    onChange={maskBase64 => {
-                      setMaskBase64(maskBase64)
-                    }}
-                    onError={errMsg => {
-                      toast.error(errMsg)
-                    }}
-                  >
-                    <Button
-                      fullWidth
-                      style={{ marginTop: '10px' }}
-                      variant={'outlined'}
-                      startIcon={<DriveFolderUploadIcon />}
-                    >
-                      Control Image
-                    </Button>
-                  </ImagePicker>
-
-                </Grid>
-              }
+             
+              <Grid item xs={12} md ={6}>
+                <TextField
+                  value={qrText}
+                  onChange={e=>{setQrText(e.target.value)}}
+                  fullWidth
+                  label='QR input'
+                  variant='outlined'
+                  />
+              </Grid>
+              <Grid item xs={12} md ={6}>
+                <center>
+                  <div id='capture'>
+                    <QRCode value={qrText}/>
+                  </div>
+                </center>
+              </Grid>
               {
                 (type === 'txt2img' || type === 'img2img') &&
                   <Grid item xs={6} md={3}>
