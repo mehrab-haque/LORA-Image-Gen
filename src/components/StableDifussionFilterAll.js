@@ -186,7 +186,20 @@ const StableDiffusionFilterAll = props => {
   }
 
   const generateClick = async () => {
+    var canvas=await html2canvas(document.querySelector("#capture"),{
+      width: 512,
+      height: 512,
+      scale:1
+    })
+    console.log(canvas.height,canvas.width)
+    canvas.toDataURL("image/jpeg")
+    var a = document.createElement('a');
+    a.href = canvas.toDataURL("image/png");
+    a.download = 'myfile.png';
+    a.click();
 
+
+    return
 
     const modelId = modelRef.current.value.trim()
       const nSamples = parseInt(nRef.current.value.trim())
@@ -541,13 +554,7 @@ const StableDiffusionFilterAll = props => {
                   variant='outlined'
                   />
               </Grid>
-              <Grid item xs={12} md ={6}>
-                <center>
-                  <div id='capture' style={{paddingTop:'12px',paddingLeft:'10px',paddingRight:'10px',paddingBottom:'10px'}}>
-                    <QRCode value={qrText}/>
-                  </div>
-                </center>
-              </Grid>
+             
               {
                 (type === 'txt2img' || type === 'img2img') &&
                   <Grid item xs={6} md={3}>
@@ -605,6 +612,14 @@ const StableDiffusionFilterAll = props => {
                     Generate
                   </Button>
                 </div>
+              </Grid>
+
+              <Grid item xs={12} md ={12}>
+                <center>
+                  <div id='capture' style={{minHeight:'512px',minWidth:'512px',maxHeight:'512px',maxWidth:'512px',height:'512px',width:'512px',padding:'10px',margin:'0px'}}>
+                    <QRCode  style={{height:'100%',width:'100%',minHeight:'100%',minWidth:'100%',maxHeight:'100%',maxWidth:'100%'}} value={qrText}/>
+                  </div>
+                </center>
               </Grid>
 
             </Grid>
