@@ -10,8 +10,8 @@ const QR=props=>{
 
     const downloadClick=async ()=>{
         var canvas=await html2canvas(document.querySelector("#capture"),{
-            width: 512,
-            height: 512,
+            width: 400,
+            height: 400,
             scale:1
         })
         canvas.toDataURL("image/png")
@@ -61,11 +61,11 @@ const QR=props=>{
                 </Paper>
             </Grid>
             <Grid item xs={6}>
-                <center>
-                  <div id='capture' style={{minHeight:'512px',minWidth:'512px',maxHeight:'512px',maxWidth:'512px',height:'512px',width:'512px',padding:'10px',margin:'0px'}}>
-                    <QRCode  style={{height:'100%',width:'100%',minHeight:'100%',minWidth:'100%',maxHeight:'100%',maxWidth:'100%'}} value={`https://2m06xslkj8.execute-api.ap-southeast-2.amazonaws.com/prod/in/item/qr?title=${title.replaceAll(':','%3A').replaceAll('/','%2F').replaceAll(' ','%20')}&link=${link.replaceAll(':','%3A').replaceAll('/','%2F').replaceAll(' ','%20')}`}/>
+          
+                  <div id='capture' style={{minHeight:'400px',minWidth:'400px',maxHeight:'400px',maxWidth:'400px',height:'400px',width:'400px',padding:'10px'}}>
+                    <QRCode  style={{height:'380px',width:'380px',minHeight:'380px',minWidth:'380px',maxHeight:'380px',maxWidth:'380px'}} value={`https://2m06xslkj8.execute-api.ap-southeast-2.amazonaws.com/prod/in/item/qr?title=${title.replaceAll(':','%3A').replaceAll('/','%2F').replaceAll(' ','%20')}&link=${link.replaceAll(':','%3A').replaceAll('/','%2F').replaceAll(' ','%20')}`}/>
                   </div>
-                </center>
+             
             </Grid>
 
         
