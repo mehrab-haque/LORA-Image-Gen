@@ -191,15 +191,15 @@ const StableDiffusionFilterAll = props => {
       height: 512,
       scale:1
     })
-    console.log(canvas.height,canvas.width)
-    canvas.toDataURL("image/jpeg")
-    var a = document.createElement('a');
-    a.href = canvas.toDataURL("image/png");
-    a.download = 'myfile.png';
-    a.click();
+    // console.log(canvas.height,canvas.width)
+    // canvas.toDataURL("image/jpeg")
+    // var a = document.createElement('a');
+    // a.href = canvas.toDataURL("image/png");
+    // a.download = 'myfile.png';
+    // a.click();
 
 
-    return
+    // return
 
     const modelId = modelRef.current.value.trim()
       const nSamples = parseInt(nRef.current.value.trim())
