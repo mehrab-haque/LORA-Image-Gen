@@ -646,7 +646,7 @@ const StableDiffusionFilterAll = props => {
                             <Grid container spacing={1}>
                               {
                                 r.data.map(o=>{
-                                  return <Grid item xs={6} md={4}>
+                                  return <Grid item xs={12} md={6}>
                                     <Paper>
                                       <img src={o} style={{width:'100%'}}/>
                                     </Paper>
