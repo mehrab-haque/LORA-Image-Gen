@@ -3,7 +3,7 @@ import StableDiffusionFilterAll from "./components/StableDifussionFilterAll"
 
 const App = props => {
 
-  return <StableDiffusionFilterAll/>
+  // return <StableDiffusionFilterAll/>
   return <StableDiffusionFilter/>
   
 }
