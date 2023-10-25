@@ -89,10 +89,10 @@ const StableDiffusionFilter = props => {
   const loadModels = async () => {
     try {
       toast('Loading models...')
-      var res = await axios.post('https://stablediffusionapi.com/api/v4/dreambooth/model_list', {
+      var res = await axios.post('https://stablediffusionapi.com/api/v3/finetune_list', {
         "key": "5MqpLpSJY3vBIPyWYQKZTzSlG9TF7JeZZeclqQT8jKYt7lHjkKQLr7HwCvox"
       })
-      setModels(res.data.map(m => m.model_id))
+      setModels(res.data.data.map(m => m.model_id))
       toast.success('Models loaded')
     } catch (err) {
       toast.error('Error loading models')
