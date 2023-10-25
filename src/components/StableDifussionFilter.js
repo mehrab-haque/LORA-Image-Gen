@@ -403,7 +403,7 @@ const StableDiffusionFilter = props => {
                         disablePortal
                         id="combo-box-demo"
                         options={models}
-                        defaultValue={{ label: 'anything-v5' }}
+                        defaultValue={{ label: 'gameiconinstitutemod' }}
                         fullWidth
                         renderInput={(params) => <TextField {...params} inputRef={modelRef} label="Model Id" />}
                       />
