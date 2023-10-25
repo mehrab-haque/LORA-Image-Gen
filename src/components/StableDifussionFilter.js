@@ -43,7 +43,7 @@ const StableDiffusionFilter = props => {
 
   const imagesRef = useRef();
 
-  const [type, setType] = useState('txt23d')
+  const [type, setType] = useState('img2img')
   const [type3d, setType3d] = useState('ply')
 
   const handleChange = e => {
@@ -386,7 +386,7 @@ const StableDiffusionFilter = props => {
                         disablePortal
                         id="combo-box-demo"
                         options={models}
-                        defaultValue={{ label: 'sd-1.5' }}
+                        defaultValue={{ label: 'gameiconinstitutemod' }}
                         fullWidth
                         renderInput={(params) => <TextField inputRef={modelRef} {...params} label="Model Id" />}
                       />
