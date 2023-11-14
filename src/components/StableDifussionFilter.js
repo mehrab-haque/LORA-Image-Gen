@@ -337,7 +337,7 @@ const StableDiffusionFilter = props => {
       <AppBar position="static">
         <Toolbar variant="dense">
           <Typography variant="h6" color="inherit" component="div">
-            FPG LORA Gen
+            <a href='https://tappocket.com' style={{textDecoration:'none',color:'yellow'}}>Return to TapPocket</a>
           </Typography>
         </Toolbar>
       </AppBar>
